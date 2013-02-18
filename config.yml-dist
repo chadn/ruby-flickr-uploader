@@ -3,5 +3,7 @@ defaults:
     shared_secret: 
     access_token: 
     access_secret: 
-    upload_path:
+    upload_path1_todo:        # where images go before starting upload
+    upload_path2_inprogress:  # once a single image is uploaded, it is moved to here
+    upload_path3_done:    # once all images from an album in path1 are uploaded, album is removed from path1 and path2 album is moved here
     allowed_ext: ['.jpg', '.png', '.JPG']
