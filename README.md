@@ -37,12 +37,14 @@ Configuration file reference:
 * shared_secret: flickr shared secret
 * access_token: flickr access token
 * access_secret: flickr access secret 
-* upload_path: where to find files to upload
+* upload_path1_todo: where images go before starting upload
+* upload_path2_inprogress: once a single image is uploaded, it is moved to here
+* upload_path3_done: once all images from an album in path1 are uploaded, album is removed from path1 and path2 album is moved here
 * allowed_ext: filter files to upload by extension
 
 ### Authenticate the script with Flickr
 
-run `ruby authenticate.rb` to get your *access_token* and *access_secret*
+Run `ruby authenticate.rb` to get your *access_token* and *access_secret*
 
 
     $ ruby authenticate.rb
@@ -57,16 +59,18 @@ You can now add token (access_token) and (access_secret) secret to your *config.
 
 ## Workflow
 
-The script's workflow, or process, is broken up to 3 steps, with 2 goals in mind. 
-The first goal is to make it fast and easy to get pictures onto flickr.  
-The second goal is to make it easy to troubleshoot if something goes wrong like internet connection breaks. 
+The script's workflow, or process, is broken up to 3 steps, with 2 goals in mind.
+The first goal is to make it fast and easy to get pictures onto flickr.
+The second goal is to make it easy to troubleshoot if something goes wrong like internet connection breaks.
 
-1. Look at albums in 'upload_path1_todo', where images go before starting upload
+The 3 steps correspond to the 3 paths in the filesystem, so you can see status just by viewing files and directories.
 
-2. As a picture is successfully uploaded, it is moved to 'upload_path2_inprogress'
+1. Look at albums in *upload_path1_todo*, where images go before starting upload
+
+2. As a picture is successfully uploaded, it is moved to *upload_path2_inprogress*
 
 3. Once all images from an album in path1 are uploaded, album is removed from path1, and the path2 album 
-(which at this point is same as album was in path1 at the start) is moved to 'upload_path3_done'
+(which at this point is same as album was in path1 at the start) is moved to *upload_path3_done*
 
 ### Troubleshooting
 
@@ -90,19 +94,14 @@ Due to Flickr API limitation, I'm using a temporary yaml (*photosets.yml*) file 
 ### Upload process
 
 The script works with a hierarchy of one or two folder levels.  For both levels, photos are given a tag that is the album name, 
-and a tag 'uploaded_by_rubyflickr' to make it easy to find and verify on flickr.com that the upload worked (this can be removed).
+and a tag 'uploaded_by_rubyflickr' to make it easy to find and verify on flickr.com that the upload worked (this tag can be removed).
 If two folder levels, the folder under the album is used to give additional tags to photos within it.
 
-photos are added to album (set
-	* APP_CONFIG['upload_path']
-	  - Album1
-	    - IMG_0001.jpg
-	  - Album2
-	    - IMG_0002.jpg
-	  ...
-
-    * APP_CONFIG['upload_path']
-      - Album3
+    * APP_CONFIG['upload_path1_todo']
+      - Album1
+        - IMG_0001.jpg
+      - Album2
+        - IMG_0002.jpg
         - tag1
           - IMG_0003.jpg
       - Album4
@@ -117,7 +116,7 @@ In this example, the script will upload:
 
 * IMG_0002.jpg in album *Album2* with tags *Album2* and uploaded_by_rubyflickr
 
-* IMG_0003.jpg in album *Album3* with tags *Album3*, *tag1*, and uploaded_by_rubyflickr
+* IMG_0003.jpg in album *Album2* with tags *Album2*, *tag1*, and uploaded_by_rubyflickr
 
 * IMG_0004.jpg in album *Album4* with tags *Album4*, *tag2*, *tag3*, and uploaded_by_rubyflickr
 
@@ -129,12 +128,14 @@ In this example, the script will upload:
     photosets.yml saved.
 
     $ ruby upload.rb 
-    You are now authenticated as chadn
-    - will upload _MG_2070.jpg in album '2012 Oday' with tags ["Ilan"]
-      found photoset with id: 72157629995407809
-	    upload done.
-	    file picture deleted.
-	    adding picture to set 72157629995407809
+	Processing /Users/chadn/Pictures/chad-flickr/upload-1-todo 2013-02-18T09:53:02
+	You are now authenticated as chadn
+	         Uploading album 'Thanksgiving ATL 2012' to flickr photoset 72157632675155088
+	- will upload 'img_0231.jpg' in album 'Thanksgiving 2012' with tags: Thanksgiving 2012,uploaded_by_rubyflickr
+	         upload done. moved to /Users/chadn/Pictures/chad-flickr/upload-2-inprogress/Thanksgiving 2012/img_0231.jpg
+	         Adding pic to album 'Thanksgiving 2012' photoset 72157632675155088
+	...
+	Done with album: /Users/chadn/Pictures/chad-flickr/upload-1-todo/Thanksgiving ATL 2012
 
 ## TODO
 

@@ -63,9 +63,9 @@ def init
     # Check if destination album exists
     photoset = $all_sets.get_set_by_title(album_filename)
     if photoset == false
-      puts "\t Uploading album '#{album_filename}' as tagged pictures, no photoset found"
+      puts "Uploading local album '#{album_filename}' as tagged pictures, no photoset found"
     else
-      puts "\t Uploading album '#{album_filename}' to flickr photoset #{photoset['id']}"
+      puts "Uploading local album '#{album_filename}' to flickr photoset #{photoset['id']}"
     end
 
     Dir.glob("#{album}/*").each do |tags_or_picture|
@@ -73,7 +73,6 @@ def init
       tags_or_picture_filename = File.basename tags_or_picture
       #puts "tags_or_picture filename: #{tags_or_picture_filename}"
       next if tags_or_picture_filename[0] == '.'
-
 
       if File.directory?("#{tags_or_picture}")
         if not validateDir "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}/#{tags_or_picture_filename}", true
@@ -90,12 +89,14 @@ def init
         process_picture(album_filename, tags_or_picture, '')
       end
     end
+
     if isEmpty album 
       Dir.unlink album  # in path1
       oldname = "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}"
       newname = "#{APP_CONFIG['upload_path3_done']}/#{album_filename}"
       File.rename oldname, newname
-      puts "Done with album: #{album}\n\n"
+      puts "Done with album: #{newname}"
+      puts "http://www.flickr.com/photos/#{login.username}/sets/#{photoset['id']}\n\n"
     else
       puts "NOT Done with album: #{album}\n\n"
     end
@@ -114,11 +115,8 @@ def process_picture album_filename, picture, tags_filename
   # exclude dotfiles
   return if picture_filename[0] == '.'
 
-  if not tags_filename
-    tags_filename += ','
-  end
-  tags_filename += "#{album_filename}"
-  tags_filename += ",uploaded_by_rubyflickr"  # comment this out if necessary.
+  tags_filename += ",#{album_filename}"
+  tags_filename += ",uploaded_by_rubyflickr"  # optionally comment this out.
   puts "- will upload '#{picture_filename}' in album '#{album_filename}' with tags: #{tags_filename}"
 
   begin
@@ -165,6 +163,8 @@ def process_picture album_filename, picture, tags_filename
     end
   end
 end
+
+
 
 def validateDir path, create
   if not create
