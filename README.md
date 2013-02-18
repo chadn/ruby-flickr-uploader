@@ -61,13 +61,13 @@ You can now add token (access_token) and (access_secret) secret to your *config.
 
 The script's workflow, or process, is broken up to 3 steps, with 2 goals in mind.
 The first goal is to make it fast and easy to get pictures onto flickr.
-The second goal is to make it easy to troubleshoot if something goes wrong like internet connection breaks.
+The second goal is to make it easy to troubleshoot if something goes wrong.
 
-The 3 steps correspond to the 3 paths in the filesystem, so you can see status just by viewing files and directories.
+The script's 3 steps correspond to the 3 paths in the filesystem, so you can see status just by viewing files and directories.
 
-1. Look at albums in *upload_path1_todo*, where images go before starting upload
+1. Script reads albums in *upload_path1_todo*, and begins upload.
 
-2. As a picture is successfully uploaded, it is moved to *upload_path2_inprogress*
+2. As each picture is successfully uploaded, it is moved to *upload_path2_inprogress*
 
 3. Once all images from an album in path1 are uploaded, album is removed from path1, and the path2 album 
 (which at this point is same as album was in path1 at the start) is moved to *upload_path3_done*
@@ -76,7 +76,7 @@ The 3 steps correspond to the 3 paths in the filesystem, so you can see status j
 
 If internet connection does go out, or there is an issue with the flickr api, the above steps help you by 
 making it easy to compare the script thinks has happened with what you see on flickr.
-Specifically you can view which albums are done uploading, which are still in progress (and what images are left), and which have not even started.  
+Specifically you can view which albums are done uploading, which are still in progress (and what images are left), and which have not even started.
 On flickr you can search using tags to see which photos were actually uploaded successfully.
 
 ### Fetch your sets
@@ -94,8 +94,8 @@ Due to Flickr API limitation, I'm using a temporary yaml (*photosets.yml*) file 
 ### Upload process
 
 The script works with a hierarchy of one or two folder levels.  For both levels, photos are given a tag that is the album name, 
-and a tag 'uploaded_by_rubyflickr' to make it easy to find and verify on flickr.com that the upload worked (this tag can be removed).
-If two folder levels, the folder under the album is used to give additional tags to photos within it.
+and a tag 'uploaded_by_rubyflickr'.  The uploaded tag should make it easy to find and verify on flickr.com that the upload worked (this tag can be removed).
+If there are two folder levels, the folder under the album is used to give additional tags to photos within it.
 
     * APP_CONFIG['upload_path1_todo']
       - Album1
