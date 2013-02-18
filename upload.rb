@@ -43,8 +43,8 @@ def init
     puts "Your config upload_path1_todo is empty."
     exit
   end
-  t = Time.now   #=> 2007-11-17 15:18:03 +0900
-  puts "Processing #{APP_CONFIG['upload_path1_todo']} %s" % t.strftime("%FT%T")
+  startTime = Time.now   #=> 2007-11-17 15:18:03 +0900
+  puts "Processing #{APP_CONFIG['upload_path1_todo']} %s" % startTime.strftime("%FT%T")
   
   login = flickr.test.login
   puts "You are now authenticated as #{login.username}"
@@ -96,11 +96,22 @@ def init
       newname = "#{APP_CONFIG['upload_path3_done']}/#{album_filename}"
       File.rename oldname, newname
       puts "Done with album: #{newname}"
-      puts "http://www.flickr.com/photos/#{login.username}/sets/#{photoset['id']}\n\n"
+      if photoset == false
+        tagalbum = album_filename.gsub(' ','').downcase
+        puts " ====> You probably want to create a set with these photos:"
+        puts "http://www.flickr.com/photos/organize/"
+        puts "http://www.flickr.com/photos/#{login.username}/tags/#{tagalbum}\n\n"
+      else
+        puts "http://www.flickr.com/photos/#{login.username}/sets/#{photoset['id']}\n\n"
+      end
     else
       puts "NOT Done with album: #{album}\n\n"
     end
   end
+  endTime = Time.now   #=> 2007-11-17 15:18:03 +0900
+  elapsedSecs = endTime - startTime
+  puts "All Done.  Took #{elapsedSecs} seconds, end %s" % startTime.strftime("%FT%T")
+  
 end
 
 
