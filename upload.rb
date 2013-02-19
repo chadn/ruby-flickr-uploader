@@ -56,12 +56,12 @@ def init
     #puts "album filename: #{album_filename}"
 
     if not validateDir "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}", true
-      puts "Could not write to your config upload_path2_inprogress."
+      puts "Could not write to your config upload_path2_inprogress: " + APP_CONFIG['upload_path2_inprogress']
       exit
     end
 
     if not validateDir "#{APP_CONFIG['upload_path3_done']}/#{album_filename}", true
-      puts "Could not write to your config upload_path3_done."
+      puts "Could not write to your config upload_path3_done: " + APP_CONFIG['upload_path3_done']
       exit
     end
 
@@ -73,12 +73,16 @@ def init
       puts "Uploading local album '#{album_filename}' to flickr photoset #{photoset['id']}"
     end
 
+    # Go through each album and process pictures
+    #
     Dir.glob("#{album}/*").each do |tags_or_picture|
       #puts "tags path: #{tags}"
       tags_or_picture_filename = File.basename tags_or_picture
       #puts "tags_or_picture filename: #{tags_or_picture_filename}"
       next if tags_or_picture_filename[0] == '.'
 
+      # Create directories in path2 and path3
+      #
       if File.directory?("#{tags_or_picture}")
         if not validateDir "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}/#{tags_or_picture_filename}", true
           puts "Could not write to your config upload_path2_inprogress."
@@ -130,7 +134,7 @@ end
 def process_picture album_filename, picture, tags_filename
   picture_filename = File.basename picture
   if not APP_CONFIG['allowed_ext'].include? File.extname(picture_filename)
-    puts "- #{File.extname(picture_filename)} are not allowed for upload, file was (#{picture_filename})"
+    puts "- #{File.extname(picture_filename)} are not allowed for upload, skipping (#{picture_filename})"
     return
   end
   
@@ -139,7 +143,7 @@ def process_picture album_filename, picture, tags_filename
 
   tags_filename += ",#{album_filename}"
   tags_filename += ",uploaded_by_rubyflickr"  # optionally comment this out.
-  puts "- will upload '#{picture_filename}' in album '#{album_filename}' with tags: #{tags_filename}"
+  puts "- uploading '#{picture_filename}' in album '#{album_filename}' with tags: #{tags_filename}"
 
   begin
     # NOTE: encode not supported in ruby 1.8.7, but is in ruby  1.9.x
@@ -174,12 +178,12 @@ def process_picture album_filename, picture, tags_filename
   r = Regexp.new(APP_CONFIG['upload_path1_todo'])
   newpicture = picture_path.gsub(r, APP_CONFIG['upload_path2_inprogress'])
   File.rename  picture_path, newpicture
-  puts "\t upload done. moved to #{newpicture}"
+  #puts "\t upload done. moved to #{newpicture}"
   
-  # add to album if it exists
+  # add to flickr set if it exists
   photoset = $all_sets.get_set_by_title(album_filename)
   if photoset 
-    puts "\t Adding pic to album '#{album_filename}' photoset #{photoset['id']}"
+    #puts "\t Adding pic to album '#{album_filename}' photoset #{photoset['id']}"
     if not $noUpload
       res = flickr.call "flickr.photosets.addPhoto", {'photoset_id' => photoset['id'], 'photo_id' => picture_id}
     end
