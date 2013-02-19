@@ -60,6 +60,11 @@ def init
       exit
     end
 
+    if not validateDir "#{APP_CONFIG['upload_path3_done']}/#{album_filename}", true
+      puts "Could not write to your config upload_path3_done."
+      exit
+    end
+
     # Check if destination album exists
     photoset = $all_sets.get_set_by_title(album_filename)
     if photoset == false
@@ -79,6 +84,11 @@ def init
           puts "Could not write to your config upload_path2_inprogress."
           exit
         end
+        if not validateDir "#{APP_CONFIG['upload_path3_done']}/#{album_filename}/#{tags_or_picture_filename}", true
+          puts "Could not write to your config upload_path3_done."
+          exit
+        end
+
         Dir.glob("#{tags_or_picture}/*").each do |picture|
           process_picture(album_filename, picture, tags_or_picture_filename)
         end
@@ -92,10 +102,11 @@ def init
 
     if isEmpty album 
       Dir.unlink album  # in path1
-      oldname = "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}"
-      newname = "#{APP_CONFIG['upload_path3_done']}/#{album_filename}"
-      File.rename oldname, newname
-      puts "Done with album: #{newname}"
+      
+      # Success! Now move all pics from path2 to path3
+      movePath2ToPath3 album_filename
+      puts "Done with album: #{album_filename}"
+
       if photoset == false
         tagalbum = album_filename.gsub(' ','').downcase
         puts " ====> You probably want to create a set with these photos:"
@@ -175,6 +186,32 @@ def process_picture album_filename, picture, tags_filename
   end
 end
 
+
+def movePath2ToPath3 album_filename
+  rgx = Regexp.new(APP_CONFIG['upload_path2_inprogress'])
+  album = "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}"
+
+  Dir.glob("#{album}/*").each do |tags_or_picture|
+    tags_or_picture_filename = File.basename tags_or_picture
+    next if tags_or_picture_filename[0] == '.'
+
+    if File.directory?("#{tags_or_picture}")
+      Dir.glob("#{tags_or_picture}/*").each do |picture|
+        newpicture = picture.gsub(rgx, APP_CONFIG['upload_path3_done'])
+        File.rename  picture, newpicture
+      end
+      if isEmpty tags_or_picture 
+        Dir.unlink tags_or_picture
+      end
+    else
+      newpicture = tags_or_picture.gsub(rgx, APP_CONFIG['upload_path3_done'])
+      File.rename  tags_or_picture, newpicture
+    end
+  end
+  if isEmpty album 
+    Dir.unlink album
+  end
+end
 
 
 def validateDir path, create
