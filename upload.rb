@@ -96,19 +96,19 @@ def init
         Dir.glob("#{tags_or_picture}/*").each do |picture|
           process_picture(album_filename, picture, tags_or_picture_filename)
         end
-        if isEmpty tags_or_picture 
-          Dir.unlink tags_or_picture
-        end
       else
         process_picture(album_filename, tags_or_picture, '')
       end
     end
 
+    #  Done processing pictures in album. 
+    #  Move any file that may exist (including images that are not in allowed_ext)
+    # in album from path1 to path3, and remove path1/album.
+    moveToPath3 album_filename, APP_CONFIG['upload_path1_todo']
     if isEmpty album 
-      Dir.unlink album  # in path1
       
       # Success! Now move all pics from path2 to path3
-      movePath2ToPath3 album_filename
+      moveToPath3 album_filename, APP_CONFIG['upload_path2_inprogress']
       puts "Done with album: #{album_filename}"
 
       if photoset == false
@@ -191,25 +191,25 @@ def process_picture album_filename, picture, tags_filename
 end
 
 
-def movePath2ToPath3 album_filename
-  rgx = Regexp.new(APP_CONFIG['upload_path2_inprogress'])
-  album = "#{APP_CONFIG['upload_path2_inprogress']}/#{album_filename}"
+def moveToPath3 album_filename, from_path
+  rgx = Regexp.new(from_path)
+  album = "#{from_path}/#{album_filename}"
 
-  Dir.glob("#{album}/*").each do |tags_or_picture|
-    tags_or_picture_filename = File.basename tags_or_picture
-    next if tags_or_picture_filename[0] == '.'
+  Dir.glob("#{album}/*", File::FNM_DOTMATCH).each do |file_or_dir|
+    next if ['.','..'].include? File.basename file_or_dir
 
-    if File.directory?("#{tags_or_picture}")
-      Dir.glob("#{tags_or_picture}/*").each do |picture|
+    if File.directory?("#{file_or_dir}")
+      Dir.glob("#{file_or_dir}/*", File::FNM_DOTMATCH).each do |picture|
+        next if ['.','..'].include? File.basename picture
         newpicture = picture.gsub(rgx, APP_CONFIG['upload_path3_done'])
-        File.rename  picture, newpicture
+        File.rename picture, newpicture
       end
-      if isEmpty tags_or_picture 
-        Dir.unlink tags_or_picture
+      if isEmpty file_or_dir 
+        Dir.unlink file_or_dir
       end
     else
-      newpicture = tags_or_picture.gsub(rgx, APP_CONFIG['upload_path3_done'])
-      File.rename  tags_or_picture, newpicture
+      newpicture = file_or_dir.gsub(rgx, APP_CONFIG['upload_path3_done'])
+      File.rename  file_or_dir, newpicture
     end
   end
   if isEmpty album 
@@ -231,7 +231,8 @@ def validateDir path, create
 end
 
 def isEmpty path
-  Dir.glob("#{path}/*").each do |fn|
+  Dir.glob("#{path}/*", File::FNM_DOTMATCH).each do |fn|
+    puts "isEmpty: checking #{fn}"
     fn_base = File.basename fn
     next if fn_base == '.'
     next if fn_base == '..'
