@@ -165,8 +165,18 @@ def process_picture album_filename, picture, tags_filename
     picture_id = 1212
     sleep 2
   else
-    picture_id = flickr.upload_photo picture_path, :title => picture_filename, :description => "", 
+    begin
+      picture_id = flickr.upload_photo picture_path, :title => picture_filename, :description => "", 
                                :tags =>encoded_tags.join(' '), :is_public => APP_CONFIG['is_public']
+    rescue Timeout::Error => e
+      puts "  OOPS: flickr.upload_photo: Timeout::Error - #{e.message}"
+      picture_id = false
+    rescue FlickRaw, Timeout, Timeout::Error, StandardError => e
+      # http://stackoverflow.com/questions/10048173/why-is-it-bad-style-to-rescue-exception-e-in-ruby
+      puts "  OOPS: flickr.upload_photo: #{e.message}"
+      puts "  OOPS: e: #{e}"
+      picture_id = false
+    end
   end
   
   if not picture_id
