@@ -133,7 +133,7 @@ end
 
 def process_picture album_filename, picture, tags_filename
   picture_filename = File.basename picture
-  if not APP_CONFIG['allowed_ext'].include? File.extname(picture_filename)
+  if not APP_CONFIG['allowed_ext'].include? File.extname(picture_filename).downcase
     puts "- #{File.extname(picture_filename)} are not allowed for upload, skipping (#{picture_filename})"
     return
   end
@@ -232,7 +232,7 @@ end
 
 def isEmpty path
   Dir.glob("#{path}/*", File::FNM_DOTMATCH).each do |fn|
-    puts "isEmpty: checking #{fn}"
+    #puts "isEmpty: checking #{fn}"
     fn_base = File.basename fn
     next if fn_base == '.'
     next if fn_base == '..'
