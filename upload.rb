@@ -15,7 +15,6 @@ require 'FileUtils'
 require 'flickraw'
 require 'Photosets'
 
-
 ##
 ## Upload script
 ##
@@ -35,7 +34,7 @@ flickr.access_secret = APP_CONFIG['access_secret']
 
 
 def init
-  if not validateDir(APP_CONFIG['upload_path1_todo'],false)
+  if not validateDir APP_CONFIG['upload_path1_todo'], false
     puts "Your config upload_path1_todo doesn't exist."
     exit
   end
