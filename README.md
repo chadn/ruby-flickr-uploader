@@ -148,3 +148,6 @@ In this example, the script will upload:
 ruby-flickr-uploader is released under the MIT license:
 
 * [http://www.opensource.org/licenses/MIT](http://www.opensource.org/licenses/MIT)
+
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/6ee9cfa9b21f99f3ffe633b7836ebdfd "githalytics.com")](http://githalytics.com/chadn/ruby-flickr-uploader)
